@@ -347,7 +347,20 @@ func (s *Scanner) isIdentRune(ch rune, i int) bool {
 	if s.IsIdentRune != nil {
 		return ch != EOF && s.IsIdentRune(ch, i)
 	}
-	return ch == '_' || unicode.IsLetter(ch) || unicode.IsDigit(ch) && i > 0
+	return ch == '_' ||
+		ch == '-' ||
+		ch == '*' ||
+		ch == '+' ||
+		// ch == '/' ||
+		ch == '?' ||
+		ch == '~' ||
+		ch == '@' ||
+		ch == '!' ||
+		ch == '<' ||
+		ch == '>' ||
+		ch == '=' ||
+		unicode.IsLetter(ch) ||
+		(unicode.IsDigit(ch) && i > 0)
 }
 
 func (s *Scanner) scanIdentifier() rune {

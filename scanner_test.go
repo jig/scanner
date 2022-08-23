@@ -107,6 +107,14 @@ var tokenList = []token{
 	{Ident, "bar９８７６"},
 	{Ident, f100},
 
+	{Ident, "*host-language*"},
+	{Ident, "read-string"},
+	{Ident, "true?"},
+	{Ident, "def!"},
+	{Ident, "="},
+	{Ident, "<="},
+	{Ident, "****"},
+
 	{Comment, "// decimal ints"},
 	{Int, "0"},
 	{Int, "1"},
@@ -218,11 +226,14 @@ var tokenList = []token{
 	// NUL character is not allowed
 	{'\x01', "\x01"},
 	{' ' - 1, string(' ' - 1)},
-	{'+', "+"},
-	{'/', "/"},
 	{'.', "."},
-	{'~', "~"},
 	{'(', "("},
+	{')', ")"},
+	{'{', "{"},
+	{'}', "}"},
+	{'[', "["},
+	{']', "]"},
+	{';', ";"},
 }
 
 func makeSource(pattern string) *bytes.Buffer {
@@ -414,15 +425,12 @@ func TestScanNext(t *testing.T) {
 	s := new(Scanner).Init(strings.NewReader(BOMs + "if a == bcd /* com" + BOMs + "ment */ {\n\ta += c\n}" + BOMs + "// line comment ending in eof"))
 	checkTok(t, s, 1, s.Scan(), Ident, "if") // the first BOM is ignored
 	checkTok(t, s, 1, s.Scan(), Ident, "a")
-	checkTok(t, s, 1, s.Scan(), '=', "=")
-	checkTok(t, s, 0, s.Next(), '=', "")
+	checkTok(t, s, 1, s.Scan(), Ident, "==")
 	checkTok(t, s, 0, s.Next(), ' ', "")
-	checkTok(t, s, 0, s.Next(), 'b', "")
-	checkTok(t, s, 1, s.Scan(), Ident, "cd")
+	checkTok(t, s, 1, s.Scan(), Ident, "bcd")
 	checkTok(t, s, 1, s.Scan(), '{', "{")
 	checkTok(t, s, 2, s.Scan(), Ident, "a")
-	checkTok(t, s, 2, s.Scan(), '+', "+")
-	checkTok(t, s, 0, s.Next(), '=', "")
+	checkTok(t, s, 2, s.Scan(), Ident, "+=")
 	checkTok(t, s, 2, s.Scan(), Ident, "c")
 	checkTok(t, s, 3, s.Scan(), '}', "}")
 	checkTok(t, s, 3, s.Scan(), BOM, BOMs)
