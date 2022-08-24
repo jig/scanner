@@ -79,6 +79,11 @@ var tokenList = []token{
 	{Comment, ";; // comment //"},
 	{Comment, ";;" + f100},
 
+	{Comment, ";; single semi-colon line comments"},
+	{Comment, "; single semi-colon comment"},
+	{Comment, ";"},
+	{Comment, ";" + f100},
+
 	{Comment, ";; identifiers"},
 	{Ident, "a"},
 	{Ident, "a0"},
@@ -210,7 +215,7 @@ var tokenList = []token{
 	{Comment, ";; raw strings"},
 	{RawString, "``"},
 	{RawString, "`\\`"},
-	{RawString, "`" + "\n\n;* foobar *;\n\n" + "`"},
+	{RawString, "`" + "\n\n;; foobar ;;\n\n" + "`"},
 	{RawString, "`" + f100 + "`"},
 
 	{Comment, ";; individual characters"},
@@ -224,7 +229,6 @@ var tokenList = []token{
 	{'}', "}"},
 	{'[', "["},
 	{']', "]"},
-	{';', ";"},
 }
 
 func makeSource(pattern string) *bytes.Buffer {
@@ -413,7 +417,7 @@ func TestScanCustomIdent(t *testing.T) {
 func TestScanNext(t *testing.T) {
 	const BOM = '\uFEFF'
 	BOMs := string(BOM)
-	s := new(Scanner).Init(strings.NewReader(BOMs + "if a == bcd ;; com" + BOMs + "ment \n {\n\ta += c\n}" + BOMs + ";; line comment ending in eof"))
+	s := new(Scanner).Init(strings.NewReader(BOMs + "if a == bcd ; com" + BOMs + "ment \n {\n\ta += c\n}" + BOMs + "; line comment ending in eof"))
 	checkTok(t, s, 1, s.Scan(), Ident, "if") // the first BOM is ignored
 	checkTok(t, s, 1, s.Scan(), Ident, "a")
 	checkTok(t, s, 1, s.Scan(), Ident, "==")
@@ -426,6 +430,14 @@ func TestScanNext(t *testing.T) {
 	checkTok(t, s, 4, s.Scan(), '}', "}")
 	checkTok(t, s, 4, s.Scan(), BOM, BOMs)
 	checkTok(t, s, 4, s.Scan(), -1, "")
+	if s.ErrorCount != 0 {
+		t.Errorf("%d errors", s.ErrorCount)
+	}
+}
+
+func TestScanSingleSemiColon(t *testing.T) {
+	s := new(Scanner).Init(strings.NewReader(";"))
+	checkTok(t, s, 1, s.Scan(), -1, "")
 	if s.ErrorCount != 0 {
 		t.Errorf("%d errors", s.ErrorCount)
 	}

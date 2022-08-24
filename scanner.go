@@ -624,29 +624,13 @@ func (s *Scanner) scanChar() {
 }
 
 func (s *Scanner) scanComment(ch rune) rune {
-	// ch == ';' || ch == '*'
-	if ch == ';' {
+	if ch != '\n' {
 		// line comment
 		ch = s.next() // read character after ";;"
 		for ch != '\n' && ch >= 0 {
 			ch = s.next()
 		}
 		return ch
-	}
-
-	// general comment
-	ch = s.next() // read character after ";*"
-	for {
-		if ch < 0 {
-			s.error("comment not terminated")
-			break
-		}
-		ch0 := ch
-		ch = s.next()
-		if ch0 == '*' && ch == ';' {
-			ch = s.next()
-			break
-		}
 	}
 	return ch
 }
@@ -727,7 +711,7 @@ redo:
 			}
 		case ';':
 			ch = s.next()
-			if ch == ';' && s.Mode&ScanComments != 0 {
+			if s.Mode&ScanComments != 0 {
 				if s.Mode&SkipComments != 0 {
 					s.tokPos = -1 // don't collect token text
 					ch = s.scanComment(ch)
