@@ -71,24 +71,15 @@ type token struct {
 var f100 = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
 
 var tokenList = []token{
-	{Comment, "// line comments"},
-	{Comment, "//"},
-	{Comment, "////"},
-	{Comment, "// comment"},
-	{Comment, "// /* comment */"},
-	{Comment, "// // comment //"},
-	{Comment, "//" + f100},
+	{Comment, ";; line comments"},
+	{Comment, ";;"},
+	{Comment, ";;//"},
+	{Comment, ";; comment"},
+	{Comment, ";; ;* comment *;"},
+	{Comment, ";; // comment //"},
+	{Comment, ";;" + f100},
 
-	{Comment, "// general comments"},
-	{Comment, "/**/"},
-	{Comment, "/***/"},
-	{Comment, "/* comment */"},
-	{Comment, "/* // comment */"},
-	{Comment, "/* /* comment */"},
-	{Comment, "/*\n comment\n*/"},
-	{Comment, "/*" + f100 + "*/"},
-
-	{Comment, "// identifiers"},
+	{Comment, ";; identifiers"},
 	{Ident, "a"},
 	{Ident, "a0"},
 	{Ident, "foobar"},
@@ -115,21 +106,21 @@ var tokenList = []token{
 	{Ident, "<="},
 	{Ident, "****"},
 
-	{Comment, "// decimal ints"},
+	{Comment, ";; decimal ints"},
 	{Int, "0"},
 	{Int, "1"},
 	{Int, "9"},
 	{Int, "42"},
 	{Int, "1234567890"},
 
-	{Comment, "// octal ints"},
+	{Comment, ";; octal ints"},
 	{Int, "00"},
 	{Int, "01"},
 	{Int, "07"},
 	{Int, "042"},
 	{Int, "01234567"},
 
-	{Comment, "// hexadecimal ints"},
+	{Comment, ";; hexadecimal ints"},
 	{Int, "0x0"},
 	{Int, "0x1"},
 	{Int, "0xf"},
@@ -143,7 +134,7 @@ var tokenList = []token{
 	{Int, "0X123456789abcDEF"},
 	{Int, "0X" + f100},
 
-	{Comment, "// floats"},
+	{Comment, ";; floats"},
 	{Float, "0."},
 	{Float, "1."},
 	{Float, "42."},
@@ -173,7 +164,7 @@ var tokenList = []token{
 	{Float, "42E+10"},
 	{Float, "01234567890E-10"},
 
-	{Comment, "// chars"},
+	{Comment, ";; chars"},
 	{Char, `' '`},
 	{Char, `'a'`},
 	{Char, `'本'`},
@@ -194,7 +185,7 @@ var tokenList = []token{
 	{Char, `'\U00000000'`},
 	{Char, `'\U0000ffAB'`},
 
-	{Comment, "// strings"},
+	{Comment, ";; strings"},
 	{String, `" "`},
 	{String, `"a"`},
 	{String, `"本"`},
@@ -216,13 +207,13 @@ var tokenList = []token{
 	{String, `"\U0000ffAB"`},
 	{String, `"` + f100 + `"`},
 
-	{Comment, "// raw strings"},
+	{Comment, ";; raw strings"},
 	{RawString, "``"},
 	{RawString, "`\\`"},
-	{RawString, "`" + "\n\n/* foobar */\n\n" + "`"},
+	{RawString, "`" + "\n\n;* foobar *;\n\n" + "`"},
 	{RawString, "`" + f100 + "`"},
 
-	{Comment, "// individual characters"},
+	{Comment, ";; individual characters"},
 	// NUL character is not allowed
 	{'\x01', "\x01"},
 	{' ' - 1, string(' ' - 1)},
@@ -422,7 +413,7 @@ func TestScanCustomIdent(t *testing.T) {
 func TestScanNext(t *testing.T) {
 	const BOM = '\uFEFF'
 	BOMs := string(BOM)
-	s := new(Scanner).Init(strings.NewReader(BOMs + "if a == bcd /* com" + BOMs + "ment */ {\n\ta += c\n}" + BOMs + "// line comment ending in eof"))
+	s := new(Scanner).Init(strings.NewReader(BOMs + "if a == bcd ;* com" + BOMs + "ment *; {\n\ta += c\n}" + BOMs + ";; line comment ending in eof"))
 	checkTok(t, s, 1, s.Scan(), Ident, "if") // the first BOM is ignored
 	checkTok(t, s, 1, s.Scan(), Ident, "a")
 	checkTok(t, s, 1, s.Scan(), Ident, "==")
@@ -522,7 +513,6 @@ func TestError(t *testing.T) {
 	testError(t, `"abc`, "<input>:1:5", "literal not terminated", String)
 	testError(t, `"abc`+"\n", "<input>:1:5", "literal not terminated", String)
 	testError(t, "`abc\n", "<input>:2:1", "literal not terminated", RawString)
-	testError(t, `/*/`, "<input>:1:4", "comment not terminated", EOF)
 }
 
 // An errReader returns (0, err) where err is not io.EOF.

@@ -624,10 +624,10 @@ func (s *Scanner) scanChar() {
 }
 
 func (s *Scanner) scanComment(ch rune) rune {
-	// ch == '/' || ch == '*'
-	if ch == '/' {
+	// ch == ';' || ch == '*'
+	if ch == ';' {
 		// line comment
-		ch = s.next() // read character after "//"
+		ch = s.next() // read character after ";;"
 		for ch != '\n' && ch >= 0 {
 			ch = s.next()
 		}
@@ -635,7 +635,7 @@ func (s *Scanner) scanComment(ch rune) rune {
 	}
 
 	// general comment
-	ch = s.next() // read character after "/*"
+	ch = s.next() // read character after ";*"
 	for {
 		if ch < 0 {
 			s.error("comment not terminated")
@@ -643,7 +643,7 @@ func (s *Scanner) scanComment(ch rune) rune {
 		}
 		ch0 := ch
 		ch = s.next()
-		if ch0 == '*' && ch == '/' {
+		if ch0 == '*' && ch == ';' {
 			ch = s.next()
 			break
 		}
@@ -725,9 +725,9 @@ redo:
 			if isDecimal(ch) && s.Mode&ScanFloats != 0 {
 				tok, ch = s.scanNumber(ch, true)
 			}
-		case '/':
+		case ';':
 			ch = s.next()
-			if (ch == '/' || ch == '*') && s.Mode&ScanComments != 0 {
+			if (ch == ';' || ch == '*') && s.Mode&ScanComments != 0 {
 				if s.Mode&SkipComments != 0 {
 					s.tokPos = -1 // don't collect token text
 					ch = s.scanComment(ch)
