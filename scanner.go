@@ -607,8 +607,8 @@ func (s *Scanner) scanString(quote rune) (n int) {
 }
 
 func (s *Scanner) scanRawString() {
-	ch := s.next() // read character after '`'
-	for ch != '`' {
+	ch := s.next() // read character after '¬'
+	for ch != '¬' {
 		if ch < 0 {
 			s.error("literal not terminated")
 			return
@@ -720,7 +720,7 @@ redo:
 				ch = s.scanComment(ch)
 				tok = Comment
 			}
-		case '`':
+		case '¬':
 			if s.Mode&ScanRawStrings != 0 {
 				s.scanRawString()
 				tok = RawString
