@@ -704,12 +704,12 @@ redo:
 				tok = String
 			}
 			ch = s.next()
-		case '\'':
-			if s.Mode&ScanChars != 0 {
-				s.scanChar()
-				tok = Char
-			}
-			ch = s.next()
+		// case '\'':
+		// 	if s.Mode&ScanChars != 0 {
+		// 		s.scanChar()
+		// 		tok = Char
+		// 	}
+		// 	ch = s.next()
 		case '.':
 			ch = s.next()
 			if isDecimal(ch) && s.Mode&ScanFloats != 0 {

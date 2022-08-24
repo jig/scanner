@@ -169,27 +169,6 @@ var tokenList = []token{
 	{Float, "42E+10"},
 	{Float, "01234567890E-10"},
 
-	{Comment, ";; chars"},
-	{Char, `' '`},
-	{Char, `'a'`},
-	{Char, `'本'`},
-	{Char, `'\a'`},
-	{Char, `'\b'`},
-	{Char, `'\f'`},
-	{Char, `'\n'`},
-	{Char, `'\r'`},
-	{Char, `'\t'`},
-	{Char, `'\v'`},
-	{Char, `'\''`},
-	{Char, `'\000'`},
-	{Char, `'\777'`},
-	{Char, `'\x00'`},
-	{Char, `'\xff'`},
-	{Char, `'\u0000'`},
-	{Char, `'\ufA16'`},
-	{Char, `'\U00000000'`},
-	{Char, `'\U0000ffAB'`},
-
 	{Comment, ";; strings"},
 	{String, `" "`},
 	{String, `"a"`},
@@ -234,6 +213,7 @@ var tokenList = []token{
 	{'}', "}"},
 	{'[', "["},
 	{']', "]"},
+	{'\'', "'"},
 }
 
 func makeSource(pattern string) *bytes.Buffer {
@@ -391,7 +371,6 @@ func TestScanSelectedMask(t *testing.T) {
 	// Don't test ScanInts and ScanNumbers since some parts of
 	// the floats in the source look like (invalid) octal ints
 	// and ScanNumbers may return either Int or Float.
-	testScanSelectedMode(t, ScanChars, Char)
 	testScanSelectedMode(t, ScanStrings, String)
 	testScanSelectedMode(t, SkipComments, 0)
 	testScanSelectedMode(t, ScanComments, Comment)
@@ -512,21 +491,15 @@ func TestError(t *testing.T) {
 	testError(t, "¬ab"+"\x80", "<input>:1:4", "invalid UTF-8 encoding", RawString)
 	testError(t, "¬abc"+"\xff", "<input>:1:5", "invalid UTF-8 encoding", RawString)
 
-	testError(t, `'\"'`, "<input>:1:3", "invalid char escape", Char)
-	testError(t, `"\'"`, "<input>:1:3", "invalid char escape", String)
-
 	testError(t, `01238`, "<input>:1:6", "invalid digit '8' in octal literal", Int)
 	testError(t, `01238123`, "<input>:1:9", "invalid digit '8' in octal literal", Int)
 	testError(t, `0x`, "<input>:1:3", "hexadecimal literal has no digits", Int)
 	testError(t, `0xg`, "<input>:1:3", "hexadecimal literal has no digits", Int)
-	testError(t, `'aa'`, "<input>:1:4", "invalid char literal", Char)
 	testError(t, `1.5e`, "<input>:1:5", "exponent has no digits", Float)
 	testError(t, `1.5E`, "<input>:1:5", "exponent has no digits", Float)
 	testError(t, `1.5e+`, "<input>:1:6", "exponent has no digits", Float)
 	testError(t, `1.5e-`, "<input>:1:6", "exponent has no digits", Float)
 
-	testError(t, `'`, "<input>:1:2", "literal not terminated", Char)
-	testError(t, `'`+"\n", "<input>:1:2", "literal not terminated", Char)
 	testError(t, `"abc`, "<input>:1:5", "literal not terminated", String)
 	testError(t, `"abc`+"\n", "<input>:1:5", "literal not terminated", String)
 	testError(t, "¬abc\n", "<input>:2:1", "literal not terminated", RawString)
