@@ -214,6 +214,7 @@ var tokenList = []token{
 	{'[', "["},
 	{']', "]"},
 	{'\'', "'"},
+	{'`', "`"},
 }
 
 func makeSource(pattern string) *bytes.Buffer {
