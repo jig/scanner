@@ -727,7 +727,7 @@ redo:
 			}
 		case ';':
 			ch = s.next()
-			if (ch == ';' || ch == '*') && s.Mode&ScanComments != 0 {
+			if ch == ';' && s.Mode&ScanComments != 0 {
 				if s.Mode&SkipComments != 0 {
 					s.tokPos = -1 // don't collect token text
 					ch = s.scanComment(ch)

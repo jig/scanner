@@ -413,19 +413,19 @@ func TestScanCustomIdent(t *testing.T) {
 func TestScanNext(t *testing.T) {
 	const BOM = '\uFEFF'
 	BOMs := string(BOM)
-	s := new(Scanner).Init(strings.NewReader(BOMs + "if a == bcd ;* com" + BOMs + "ment *; {\n\ta += c\n}" + BOMs + ";; line comment ending in eof"))
+	s := new(Scanner).Init(strings.NewReader(BOMs + "if a == bcd ;; com" + BOMs + "ment \n {\n\ta += c\n}" + BOMs + ";; line comment ending in eof"))
 	checkTok(t, s, 1, s.Scan(), Ident, "if") // the first BOM is ignored
 	checkTok(t, s, 1, s.Scan(), Ident, "a")
 	checkTok(t, s, 1, s.Scan(), Ident, "==")
 	checkTok(t, s, 0, s.Next(), ' ', "")
 	checkTok(t, s, 1, s.Scan(), Ident, "bcd")
-	checkTok(t, s, 1, s.Scan(), '{', "{")
-	checkTok(t, s, 2, s.Scan(), Ident, "a")
-	checkTok(t, s, 2, s.Scan(), Ident, "+=")
-	checkTok(t, s, 2, s.Scan(), Ident, "c")
-	checkTok(t, s, 3, s.Scan(), '}', "}")
-	checkTok(t, s, 3, s.Scan(), BOM, BOMs)
-	checkTok(t, s, 3, s.Scan(), -1, "")
+	checkTok(t, s, 2, s.Scan(), '{', "{")
+	checkTok(t, s, 3, s.Scan(), Ident, "a")
+	checkTok(t, s, 3, s.Scan(), Ident, "+=")
+	checkTok(t, s, 3, s.Scan(), Ident, "c")
+	checkTok(t, s, 4, s.Scan(), '}', "}")
+	checkTok(t, s, 4, s.Scan(), BOM, BOMs)
+	checkTok(t, s, 4, s.Scan(), -1, "")
 	if s.ErrorCount != 0 {
 		t.Errorf("%d errors", s.ErrorCount)
 	}
