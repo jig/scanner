@@ -13,28 +13,30 @@ import (
 
 func Example() {
 	const src = `; This is scanned code
-(def a '(list 1 2 3))
+(def a '(list 1 2 "hel\"lo" ¬hel¬¬lo¬ 3.14))
 `
 
 	var s scanner.Scanner
 	s.Init(strings.NewReader(src))
 	s.Filename = "example"
 	for tok := s.Scan(); tok != scanner.EOF; tok = s.Scan() {
-		fmt.Printf("%s: %s\n", s.Position, s.TokenText())
+		fmt.Printf("%s: (%s) %s\n", s.Position, scanner.TokenString(tok), s.TokenText())
 	}
 
 	// Output:
-	// example:2:1: (
-	// example:2:2: def
-	// example:2:6: a
-	// example:2:8: '
-	// example:2:9: (
-	// example:2:10: list
-	// example:2:15: 1
-	// example:2:17: 2
-	// example:2:19: 3
-	// example:2:20: )
-	// example:2:21: )
+	// example:2:1: ("(") (
+	// example:2:2: (Ident) def
+	// example:2:6: (Ident) a
+	// example:2:8: ("'") '
+	// example:2:9: ("(") (
+	// example:2:10: (Ident) list
+	// example:2:15: (Int) 1
+	// example:2:17: (Int) 2
+	// example:2:19: (String) "hel\"lo"
+	// example:2:29: (RawString) ¬hel¬¬lo¬
+	// example:2:39: (Float) 3.14
+	// example:2:43: (")") )
+	// example:2:44: (")") )
 
 }
 
