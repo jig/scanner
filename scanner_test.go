@@ -215,6 +215,11 @@ var tokenList = []token{
 	{Comment, ";; raw strings"},
 	{RawString, "¬¬"},
 	{RawString, "¬\\¬"},
+	{RawString, "¬\\¬"},
+	{RawString, "¬\\\\¬"},
+	{RawString, "¬hello¬"},
+	{RawString, "¬hel¬¬lo¬"},
+	{RawString, "¬¬¬¬"},
 	{RawString, "¬" + "\n\n;; foobar ;;\n\n" + "¬"},
 	{RawString, "¬" + f100 + "¬"},
 
@@ -525,6 +530,9 @@ func TestError(t *testing.T) {
 	testError(t, `"abc`, "<input>:1:5", "literal not terminated", String)
 	testError(t, `"abc`+"\n", "<input>:1:5", "literal not terminated", String)
 	testError(t, "¬abc\n", "<input>:2:1", "literal not terminated", RawString)
+	testError(t, "¬abc\n", "<input>:2:1", "literal not terminated", RawString)
+	testError(t, "¬abc¬¬\n", "<input>:2:1", "literal not terminated", RawString)
+	testError(t, "¬abc¬¬d\n", "<input>:2:1", "literal not terminated", RawString)
 }
 
 // An errReader returns (0, err) where err is not io.EOF.

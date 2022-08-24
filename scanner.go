@@ -606,14 +606,20 @@ func (s *Scanner) scanString(quote rune) (n int) {
 	return
 }
 
-func (s *Scanner) scanRawString() {
-	ch := s.next() // read character after '¬'
-	for ch != '¬' {
-		if ch < 0 {
-			s.error("literal not terminated")
-			return
+func (s *Scanner) scanRawString() rune {
+	for {
+		ch := s.next() // read character after '¬'
+		for ch != '¬' {
+			if ch < 0 {
+				s.error("literal not terminated")
+				return 0
+			}
+			ch = s.next()
 		}
 		ch = s.next()
+		if ch != '¬' {
+			return ch
+		}
 	}
 }
 
@@ -722,10 +728,11 @@ redo:
 			}
 		case '¬':
 			if s.Mode&ScanRawStrings != 0 {
-				s.scanRawString()
+				ch = s.scanRawString()
 				tok = RawString
+			} else {
+				ch = s.next()
 			}
-			ch = s.next()
 		default:
 			ch = s.next()
 		}
