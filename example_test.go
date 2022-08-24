@@ -12,8 +12,12 @@ import (
 )
 
 func Example() {
+	// 	const src = `; This is scanned code
+	// (def a '(list 1 2 "hel\"lo" ¬hel¬¬lo¬ 3.14))
+	// `
+
 	const src = `; This is scanned code
-(def a '(list 1 2 "hel\"lo" ¬hel¬¬lo¬ 3.14))
+(def a '(list 10 3.14 "hel\"lo" ¬hel¬¬lo¬ :a))
 `
 
 	var s scanner.Scanner
@@ -30,14 +34,13 @@ func Example() {
 	// example:2:8: ("'") '
 	// example:2:9: ("(") (
 	// example:2:10: (Ident) list
-	// example:2:15: (Int) 1
-	// example:2:17: (Int) 2
-	// example:2:19: (String) "hel\"lo"
-	// example:2:29: (RawString) ¬hel¬¬lo¬
-	// example:2:39: (Float) 3.14
-	// example:2:43: (")") )
-	// example:2:44: (")") )
-
+	// example:2:15: (Int) 10
+	// example:2:18: (Float) 3.14
+	// example:2:23: (String) "hel\"lo"
+	// example:2:33: (RawString) ¬hel¬¬lo¬
+	// example:2:43: (Keyword) :a
+	// example:2:45: (")") )
+	// example:2:46: (")") )
 }
 
 func Example_mode() {

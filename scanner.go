@@ -66,10 +66,11 @@ const (
 	ScanFloats     = 1 << -Float // includes Ints and hexadecimal floats
 	ScanChars      = 1 << -Char
 	ScanStrings    = 1 << -String
+	ScanKeywords   = 1 << -Keyword
 	ScanRawStrings = 1 << -RawString
 	ScanComments   = 1 << -Comment
 	SkipComments   = 1 << -skipComment // if set with ScanComments, comments become white space
-	GoTokens       = ScanIdents | ScanFloats | ScanChars | ScanStrings | ScanRawStrings | ScanComments | SkipComments
+	GoTokens       = ScanIdents | ScanFloats | ScanChars | ScanStrings | ScanKeywords | ScanRawStrings | ScanComments | SkipComments
 )
 
 // The result of Scan is one of these tokens or a Unicode character.
@@ -80,6 +81,7 @@ const (
 	Float
 	Char
 	String
+	Keyword
 	RawString
 	Comment
 
@@ -94,6 +96,7 @@ var tokenString = map[rune]string{
 	Float:     "Float",
 	Char:      "Char",
 	String:    "String",
+	Keyword:   "Keyword",
 	RawString: "RawString",
 	Comment:   "Comment",
 }
@@ -623,12 +626,6 @@ func (s *Scanner) scanRawString() rune {
 	}
 }
 
-func (s *Scanner) scanChar() {
-	if s.scanString('\'') != 1 {
-		s.error("invalid char literal")
-	}
-}
-
 func (s *Scanner) scanComment(ch rune) rune {
 	if ch != '\n' {
 		// line comment
@@ -704,12 +701,13 @@ redo:
 				tok = String
 			}
 			ch = s.next()
-		// case '\'':
-		// 	if s.Mode&ScanChars != 0 {
-		// 		s.scanChar()
-		// 		tok = Char
-		// 	}
-		// 	ch = s.next()
+		case ':':
+			if s.Mode&ScanKeywords != 0 {
+				tok = Keyword
+				ch = s.scanIdentifier()
+			} else {
+				ch = s.next()
+			}
 		case '.':
 			ch = s.next()
 			if isDecimal(ch) && s.Mode&ScanFloats != 0 {

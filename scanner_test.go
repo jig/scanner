@@ -202,6 +202,11 @@ var tokenList = []token{
 	{RawString, "¬" + "\n\n;; foobar ;;\n\n" + "¬"},
 	{RawString, "¬" + f100 + "¬"},
 
+	{Comment, ";; keyword"},
+	{Keyword, ":a"},
+	{Keyword, ":hello-world"},
+	{Keyword, ":*?"},
+
 	{Comment, ";; individual characters"},
 	// NUL character is not allowed
 	{'\x01', "\x01"},
