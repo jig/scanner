@@ -106,6 +106,8 @@ var tokenList = []token{
 	{Ident, "~@"},
 	{'~', "~"}, // special case
 	{'@', "@"}, // special case
+	{Ident, "#{"},
+	{'#', "#"}, // special case
 	{Ident, "$"},
 	{Ident, "$A"},
 	{Ident, "$0"},
@@ -574,6 +576,19 @@ func TestThread(t *testing.T) {
 		t.Errorf("%d errors", s.ErrorCount)
 	}
 }
+
+// (read-string "\"\n\"")
+
+// func TestEscapeCR(t *testing.T) {
+// 	s := new(Scanner).Init(strings.NewReader(`(read-string "\"\n\"")`))
+// 	checkTok(t, s, 1, s.Scan(), '(', "(")
+// 	checkTok(t, s, 1, s.Scan(), Ident, "read-string")
+// 	checkTok(t, s, 1, s.Scan(), String, `\"\n\"`)
+// 	checkTok(t, s, 1, s.Scan(), ')', ")")
+// 	if s.ErrorCount != 0 {
+// 		t.Errorf("%d errors", s.ErrorCount)
+// 	}
+// }
 
 func TestScanSingleSemiColon(t *testing.T) {
 	s := new(Scanner).Init(strings.NewReader(";"))

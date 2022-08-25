@@ -738,6 +738,14 @@ redo:
 					tok = Ident
 				}
 			}
+		case '#':
+			ch = s.next()
+			if s.Mode&ScanIdents != 0 {
+				if ch == '{' {
+					ch = s.next()
+					tok = Ident
+				}
+			}
 		default:
 			ch = s.next()
 		}
