@@ -351,7 +351,6 @@ func (s *Scanner) isIdentRune(ch rune, i int) bool {
 		return ch != EOF && s.IsIdentRune(ch, i)
 	}
 	return ch == '_' ||
-		ch == '-' ||
 		ch == '$' ||
 		ch == '*' ||
 		ch == '+' ||
@@ -362,6 +361,7 @@ func (s *Scanner) isIdentRune(ch rune, i int) bool {
 		ch == '>' ||
 		ch == '=' ||
 		unicode.IsLetter(ch) ||
+		(ch == '-' && i > 0) ||
 		(unicode.IsDigit(ch) && i > 0)
 }
 
@@ -438,6 +438,8 @@ func (s *Scanner) scanNumber(ch rune, seenDot bool) (rune, rune) {
 				base, prefix = 8, '0'
 				digsep = 1 // leading 0
 			}
+		} else if ch == '-' {
+			ch = s.next()
 		}
 		ch, ds = s.digits(ch, base, &invalid)
 		digsep |= ds
@@ -684,7 +686,7 @@ redo:
 		} else {
 			ch = s.next()
 		}
-	case isDecimal(ch):
+	case isDecimal(ch) || ch == '-':
 		if s.Mode&(ScanInts|ScanFloats) != 0 {
 			tok, ch = s.scanNumber(ch, false)
 		} else {
