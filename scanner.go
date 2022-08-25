@@ -352,6 +352,7 @@ func (s *Scanner) isIdentRune(ch rune, i int) bool {
 	}
 	return ch == '_' ||
 		ch == '-' ||
+		ch == '$' ||
 		ch == '*' ||
 		ch == '+' ||
 		ch == '/' ||

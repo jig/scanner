@@ -104,6 +104,11 @@ var tokenList = []token{
 	{Ident, f100},
 
 	{Ident, "~@"},
+	{'~', "~"}, // special case
+	{'@', "@"}, // special case
+	{Ident, "$"},
+	{Ident, "$A"},
+	{Ident, "$0"},
 	{Ident, "def"},
 	{Ident, "*host-language*"},
 	{Ident, "read-string"},
