@@ -356,8 +356,6 @@ func (s *Scanner) isIdentRune(ch rune, i int) bool {
 		ch == '+' ||
 		ch == '/' ||
 		ch == '?' ||
-		ch == '~' ||
-		ch == '@' ||
 		ch == '!' ||
 		ch == '<' ||
 		ch == '>' ||
@@ -730,6 +728,14 @@ redo:
 				tok = RawString
 			} else {
 				ch = s.next()
+			}
+		case '~':
+			ch = s.next()
+			if s.Mode&ScanIdents != 0 {
+				if ch == '@' {
+					ch = s.next()
+					tok = Ident
+				}
 			}
 		default:
 			ch = s.next()

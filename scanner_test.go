@@ -103,6 +103,8 @@ var tokenList = []token{
 	{Ident, "bar９８７６"},
 	{Ident, f100},
 
+	{Ident, "~@"},
+	{Ident, "def"},
 	{Ident, "*host-language*"},
 	{Ident, "read-string"},
 	{Ident, "true?"},
@@ -220,6 +222,8 @@ var tokenList = []token{
 	{']', "]"},
 	{'\'', "'"},
 	{'`', "`"},
+	{'~', "~"},
+	{'@', "@"},
 }
 
 func makeSource(pattern string) *bytes.Buffer {
@@ -420,6 +424,76 @@ func TestScanNext(t *testing.T) {
 	checkTok(t, s, 4, s.Scan(), '}', "}")
 	checkTok(t, s, 4, s.Scan(), BOM, BOMs)
 	checkTok(t, s, 4, s.Scan(), -1, "")
+	if s.ErrorCount != 0 {
+		t.Errorf("%d errors", s.ErrorCount)
+	}
+}
+
+func TestScanRef(t *testing.T) {
+	s := new(Scanner).Init(strings.NewReader(`@count`))
+	checkTok(t, s, 1, s.Scan(), '@', "@") // the first BOM is ignored
+	checkTok(t, s, 1, s.Scan(), Ident, "count")
+	if s.ErrorCount != 0 {
+		t.Errorf("%d errors", s.ErrorCount)
+	}
+}
+
+func TestScanRefInCode(t *testing.T) {
+	s := new(Scanner).Init(strings.NewReader(`(= @count 1000)`))
+	checkTok(t, s, 1, s.Scan(), '(', "(")
+	checkTok(t, s, 1, s.Scan(), Ident, "=")
+	checkTok(t, s, 1, s.Scan(), '@', "@")
+	checkTok(t, s, 1, s.Scan(), Ident, "count")
+	checkTok(t, s, 1, s.Scan(), Int, "1000")
+	checkTok(t, s, 1, s.Scan(), ')', ")")
+	if s.ErrorCount != 0 {
+		t.Errorf("%d errors", s.ErrorCount)
+	}
+}
+
+func TestScanRefInCode2(t *testing.T) {
+	s := new(Scanner).Init(strings.NewReader(`(prn "@count != " @count)`))
+	checkTok(t, s, 1, s.Scan(), '(', "(")
+	checkTok(t, s, 1, s.Scan(), Ident, "prn")
+	checkTok(t, s, 1, s.Scan(), String, `"@count != "`)
+	checkTok(t, s, 1, s.Scan(), '@', "@")
+	checkTok(t, s, 1, s.Scan(), Ident, "count")
+	checkTok(t, s, 1, s.Scan(), ')', ")")
+	if s.ErrorCount != 0 {
+		t.Errorf("%d errors", s.ErrorCount)
+	}
+}
+
+// (defmacro future (fn [& body] `(^{:once true} future-call (fn [] ~@body))))
+func TestScanUnquoteSplicing(t *testing.T) {
+	s := new(Scanner).Init(strings.NewReader(`(defmacro future (fn [& body] ` + "`" + `(^{:once true} future-call (fn [] ~@body))))`))
+	checkTok(t, s, 1, s.Scan(), '(', "(")
+	checkTok(t, s, 1, s.Scan(), Ident, "defmacro")
+	checkTok(t, s, 1, s.Scan(), Ident, "future")
+	checkTok(t, s, 1, s.Scan(), '(', "(")
+	checkTok(t, s, 1, s.Scan(), Ident, "fn")
+	checkTok(t, s, 1, s.Scan(), '[', "[")
+	checkTok(t, s, 1, s.Scan(), '&', "&")
+	checkTok(t, s, 1, s.Scan(), Ident, "body")
+	checkTok(t, s, 1, s.Scan(), ']', "]")
+	checkTok(t, s, 1, s.Scan(), '`', "`")
+	checkTok(t, s, 1, s.Scan(), '(', "(")
+	checkTok(t, s, 1, s.Scan(), '^', "^")
+	checkTok(t, s, 1, s.Scan(), '{', "{")
+	checkTok(t, s, 1, s.Scan(), Keyword, `:once`)
+	checkTok(t, s, 1, s.Scan(), Ident, "true")
+	checkTok(t, s, 1, s.Scan(), '}', "}")
+	checkTok(t, s, 1, s.Scan(), Ident, "future-call")
+	checkTok(t, s, 1, s.Scan(), '(', "(")
+	checkTok(t, s, 1, s.Scan(), Ident, "fn")
+	checkTok(t, s, 1, s.Scan(), '[', "[")
+	checkTok(t, s, 1, s.Scan(), ']', "]")
+	checkTok(t, s, 1, s.Scan(), Ident, "~@")
+	checkTok(t, s, 1, s.Scan(), Ident, "body")
+	checkTok(t, s, 1, s.Scan(), ')', ")")
+	checkTok(t, s, 1, s.Scan(), ')', ")")
+	checkTok(t, s, 1, s.Scan(), ')', ")")
+	checkTok(t, s, 1, s.Scan(), ')', ")")
 	if s.ErrorCount != 0 {
 		t.Errorf("%d errors", s.ErrorCount)
 	}
