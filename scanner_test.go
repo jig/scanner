@@ -499,6 +499,77 @@ func TestScanUnquoteSplicing(t *testing.T) {
 	}
 }
 
+// `(~(first form) ~@(rest form) ~acc)
+func TestMacro(t *testing.T) {
+	s := new(Scanner).Init(strings.NewReader("`" + `(~(first form) ~@(rest form) ~acc)`))
+	checkTok(t, s, 1, s.Scan(), '`', "`")
+	checkTok(t, s, 1, s.Scan(), '(', "(")
+	checkTok(t, s, 1, s.Scan(), '~', "~")
+	checkTok(t, s, 1, s.Scan(), '(', "(")
+	checkTok(t, s, 1, s.Scan(), Ident, "first")
+	checkTok(t, s, 1, s.Scan(), Ident, "form")
+	checkTok(t, s, 1, s.Scan(), ')', ")")
+	checkTok(t, s, 1, s.Scan(), Ident, "~@")
+	checkTok(t, s, 1, s.Scan(), '(', "(")
+	checkTok(t, s, 1, s.Scan(), Ident, "rest")
+	checkTok(t, s, 1, s.Scan(), Ident, "form")
+	checkTok(t, s, 1, s.Scan(), ')', ")")
+	checkTok(t, s, 1, s.Scan(), '~', "~")
+	checkTok(t, s, 1, s.Scan(), Ident, "acc")
+	checkTok(t, s, 1, s.Scan(), ')', ")")
+	if s.ErrorCount != 0 {
+		t.Errorf("%d errors", s.ErrorCount)
+	}
+}
+
+// (def _iter->
+//
+//	(fn [acc form]
+//	  (if (list? form)
+//	    `(~(first form) ~acc ~@(rest form))
+//	    (list form acc))))
+func TestThread(t *testing.T) {
+	s := new(Scanner).Init(strings.NewReader(`(def _iter->
+		(fn [acc form]
+		` + "`" + `(~(first form) ~acc ~@(rest form))
+		(list form acc))))`))
+	checkTok(t, s, 1, s.Scan(), '(', "(")
+	checkTok(t, s, 1, s.Scan(), Ident, "def")
+	checkTok(t, s, 1, s.Scan(), Ident, "_iter->")
+	checkTok(t, s, 2, s.Scan(), '(', "(")
+	checkTok(t, s, 2, s.Scan(), Ident, "fn")
+	checkTok(t, s, 2, s.Scan(), '[', "[")
+	checkTok(t, s, 2, s.Scan(), Ident, "acc")
+	checkTok(t, s, 2, s.Scan(), Ident, "form")
+	checkTok(t, s, 2, s.Scan(), ']', "]")
+	checkTok(t, s, 3, s.Scan(), '`', "`")
+	checkTok(t, s, 3, s.Scan(), '(', "(")
+	checkTok(t, s, 3, s.Scan(), '~', "~")
+	checkTok(t, s, 3, s.Scan(), '(', "(")
+	checkTok(t, s, 3, s.Scan(), Ident, "first")
+	checkTok(t, s, 3, s.Scan(), Ident, "form")
+	checkTok(t, s, 3, s.Scan(), ')', ")")
+	checkTok(t, s, 3, s.Scan(), '~', "~")
+	checkTok(t, s, 3, s.Scan(), Ident, "acc")
+	checkTok(t, s, 3, s.Scan(), Ident, "~@")
+	checkTok(t, s, 3, s.Scan(), '(', "(")
+	checkTok(t, s, 3, s.Scan(), Ident, "rest")
+	checkTok(t, s, 3, s.Scan(), Ident, "form")
+	checkTok(t, s, 3, s.Scan(), ')', ")")
+	checkTok(t, s, 3, s.Scan(), ')', ")")
+	checkTok(t, s, 4, s.Scan(), '(', "(")
+	checkTok(t, s, 4, s.Scan(), Ident, "list")
+	checkTok(t, s, 4, s.Scan(), Ident, "form")
+	checkTok(t, s, 4, s.Scan(), Ident, "acc")
+	checkTok(t, s, 4, s.Scan(), ')', ")")
+	checkTok(t, s, 4, s.Scan(), ')', ")")
+	checkTok(t, s, 4, s.Scan(), ')', ")")
+	checkTok(t, s, 4, s.Scan(), ')', ")")
+	if s.ErrorCount != 0 {
+		t.Errorf("%d errors", s.ErrorCount)
+	}
+}
+
 func TestScanSingleSemiColon(t *testing.T) {
 	s := new(Scanner).Init(strings.NewReader(";"))
 	checkTok(t, s, 1, s.Scan(), -1, "")
