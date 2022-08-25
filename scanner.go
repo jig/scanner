@@ -411,7 +411,7 @@ func (s *Scanner) digits(ch0 rune, base int, invalid *rune) (ch rune, digsep int
 	return
 }
 
-func (s *Scanner) scanNumber(ch rune, seenDot bool) (rune, rune) {
+func (s *Scanner) scanNumber(ch rune, seenDot bool, negative bool) (rune, rune) {
 	base := 10         // number base
 	prefix := rune(0)  // one of 0 (decimal), '0' (0-octal), 'x', 'o', or 'b'
 	digsep := 0        // bit 0: digit present, bit 1: '_' present
@@ -460,7 +460,12 @@ func (s *Scanner) scanNumber(ch rune, seenDot bool) (rune, rune) {
 	}
 
 	if digsep&1 == 0 {
-		s.error(litname(prefix) + " has no digits")
+		if negative {
+			// if prefixed with '-' but nothing else after, it is a bare '-'
+			tok = '-'
+		} else {
+			s.error(litname(prefix) + " has no digits")
+		}
 	}
 
 	// exponent
@@ -686,9 +691,19 @@ redo:
 		} else {
 			ch = s.next()
 		}
-	case isDecimal(ch) || ch == '-':
+	case isDecimal(ch):
 		if s.Mode&(ScanInts|ScanFloats) != 0 {
-			tok, ch = s.scanNumber(ch, false)
+			tok, ch = s.scanNumber(ch, false, false)
+		} else {
+			ch = s.next()
+		}
+	case ch == '-':
+		if s.Mode&(ScanInts|ScanFloats) != 0 {
+			ch = s.next()
+			tok, ch = s.scanNumber(ch, false, true)
+			if s.tokPos-(s.srcPos-s.lastCharLen) == -1 {
+				tok = '-'
+			}
 		} else {
 			ch = s.next()
 		}
@@ -712,7 +727,7 @@ redo:
 		case '.':
 			ch = s.next()
 			if isDecimal(ch) && s.Mode&ScanFloats != 0 {
-				tok, ch = s.scanNumber(ch, true)
+				tok, ch = s.scanNumber(ch, true, false)
 			}
 		case ';':
 			ch = s.next()
