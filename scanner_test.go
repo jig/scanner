@@ -231,7 +231,15 @@ var tokenList = []token{
 	{'`', "`"},
 	{'~', "~"},
 	{'@', "@"},
-	{'-', "-"}, // special case
+
+	{Comment, ";; minus symbol cases"},
+	{Ident, "-"},           // special case
+	{Ident, "-minus"},      // special case
+	{Ident, "hello-world"}, // special case
+	{Int, "-9"},            // special case
+	{Int, "-1984"},         // special case
+	{Int, "-1_984"},        // special case
+	{Float, "-3.141592"},   // special case
 }
 
 func makeSource(pattern string) *bytes.Buffer {
@@ -573,6 +581,19 @@ func TestThread(t *testing.T) {
 	checkTok(t, s, 4, s.Scan(), ')', ")")
 	checkTok(t, s, 4, s.Scan(), ')', ")")
 	checkTok(t, s, 4, s.Scan(), ')', ")")
+	if s.ErrorCount != 0 {
+		t.Errorf("%d errors", s.ErrorCount)
+	}
+}
+
+// (+ -1 -1)
+func TestNegativeDecimal(t *testing.T) {
+	s := new(Scanner).Init(strings.NewReader(`(- -1 -1)`))
+	checkTok(t, s, 1, s.Scan(), '(', "(")
+	checkTok(t, s, 1, s.Scan(), Ident, "-")
+	checkTok(t, s, 1, s.Scan(), Int, "-1")
+	checkTok(t, s, 1, s.Scan(), Int, "-1")
+	checkTok(t, s, 1, s.Scan(), ')', ")")
 	if s.ErrorCount != 0 {
 		t.Errorf("%d errors", s.ErrorCount)
 	}

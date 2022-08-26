@@ -698,14 +698,22 @@ redo:
 			ch = s.next()
 		}
 	case ch == '-':
-		if s.Mode&(ScanInts|ScanFloats) != 0 {
-			ch = s.next()
-			tok, ch = s.scanNumber(ch, false, true)
-			if s.tokPos-(s.srcPos-s.lastCharLen) == -1 {
-				tok = '-'
+		ch = s.next()
+		switch {
+		case s.isIdentRune(ch, 0):
+			if s.Mode&ScanIdents != 0 {
+				tok = Ident
+				ch = s.scanIdentifier()
 			}
-		} else {
-			ch = s.next()
+		case isDecimal(ch):
+			if s.Mode&(ScanInts|ScanFloats) != 0 {
+				tok, ch = s.scanNumber(ch, false, true)
+			}
+		default:
+			// "-" identifier alone
+			if s.Mode&ScanIdents != 0 {
+				tok = Ident
+			}
 		}
 	default:
 		switch ch {
