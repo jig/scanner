@@ -1,4 +1,6 @@
-Lisp lexer used by [`jig/lisp`](https://github.com/jig/lisp).
+# scanner
+
+Lisp lexer (scanner) used by [`jig/lisp`](https://github.com/jig/lisp).
 
 Code adapted from the Go `text/scanner` standard package, and mostly compatible with it (beside the fact this is for Lisp and that is for Go syntax).
 
@@ -11,3 +13,7 @@ Major differences:
 - `#{` is specially handled to support Lisp set literals
 - `~`, `@` and `~@` are specially handled to support them as synonyms of `unquote`, `deref` and `splice-unquote` respectively
 - support of Lisp keywords (e.g. `:key`) as a single token of type `Keyword`
+
+# Documentation
+
+See [pkg.go.dev/jig/scanner](https://pkg.go.dev/github.com/jig/scanner)
