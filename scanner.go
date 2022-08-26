@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"os"
 	"unicode"
 	"unicode/utf8"
 )
@@ -144,7 +143,7 @@ type Scanner struct {
 	ch rune // character before current srcPos
 
 	// Error is called for each error encountered. If no Error
-	// function is set, the error is reported to os.Stderr.
+	// function is set, the error is not reported.
 	Error func(s *Scanner, msg string)
 
 	// ErrorCount is incremented by one for each error encountered.
@@ -339,7 +338,6 @@ func (s *Scanner) error(msg string) {
 	if !pos.IsValid() {
 		pos = s.Pos()
 	}
-	fmt.Fprintf(os.Stderr, "%s: %s\n", pos, msg)
 }
 
 func (s *Scanner) errorf(format string, args ...any) {
