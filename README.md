@@ -1,6 +1,6 @@
-# scanner
+# jig/scanner
 
-Lisp lexer (scanner) used by [`jig/lisp`](https://github.com/jig/lisp).
+Lisp lexer (scanner) implemented in GO used by [`jig/lisp`](https://github.com/jig/lisp) and [`jig/tinylisp`](https://github.com/jig/tinylisp)
 
 Code adapted from the Go `text/scanner` standard package, and mostly compatible with it (beside the fact this is for Lisp and that is for Go syntax).
 
