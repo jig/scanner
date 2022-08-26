@@ -2,16 +2,19 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Copyright 2022 Jordi Íñigo Griera. All rights reserved.
+
 // Package scanner provides a scanner and tokenizer for UTF-8-encoded text.
 // It takes an io.Reader providing the source, which then can be tokenized
 // through repeated calls to the Scan function. For compatibility with
 // existing tools, the NUL character is not allowed. If the first character
 // in the source is a UTF-8 encoded byte order mark (BOM), it is discarded.
 //
-// By default, a Scanner skips white space and Go comments and recognizes all
-// literals as defined by the Go language specification. It may be
-// customized to recognize only a subset of those literals and to recognize
-// different identifier and white space characters.
+// By default, a Scanner skips white space and Lisp comments and recognizes all
+// literals as defined by the Lisp language as specified on the
+// jig/lisp implementation. It may be customized to recognize only a subset of
+// those literals and to recognize different identifier and white
+// space characters.
 package scanner
 
 import (
@@ -46,7 +49,7 @@ func (pos Position) String() string {
 }
 
 // Predefined mode bits to control recognition of tokens. For instance,
-// to configure a Scanner such that it only recognizes (Go) identifiers,
+// to configure a Scanner such that it only recognizes (Lisp) identifiers,
 // integers, and skips comments, set the Scanner's Mode field to:
 //
 //	ScanIdents | ScanInts | SkipComments
@@ -57,19 +60,18 @@ func (pos Position) String() string {
 // For instance, if the mode is ScanIdents (not ScanStrings), the string
 // "foo" is scanned as the token sequence '"' Ident '"'.
 //
-// Use GoTokens to configure the Scanner such that it accepts all Go
+// Use LispTokens to configure the Scanner such that it accepts all Go
 // literal tokens including Go identifiers. Comments will be skipped.
 const (
 	ScanIdents     = 1 << -Ident
 	ScanInts       = 1 << -Int
 	ScanFloats     = 1 << -Float // includes Ints and hexadecimal floats
-	ScanChars      = 1 << -Char
 	ScanStrings    = 1 << -String
 	ScanKeywords   = 1 << -Keyword
 	ScanRawStrings = 1 << -RawString
 	ScanComments   = 1 << -Comment
 	SkipComments   = 1 << -skipComment // if set with ScanComments, comments become white space
-	GoTokens       = ScanIdents | ScanFloats | ScanChars | ScanStrings | ScanKeywords | ScanRawStrings | ScanComments | SkipComments
+	LispTokens     = ScanIdents | ScanFloats | ScanStrings | ScanKeywords | ScanRawStrings | ScanComments | SkipComments
 )
 
 // The result of Scan is one of these tokens or a Unicode character.
@@ -78,7 +80,6 @@ const (
 	Ident
 	Int
 	Float
-	Char
 	String
 	Keyword
 	RawString
@@ -93,7 +94,6 @@ var tokenString = map[rune]string{
 	Ident:     "Ident",
 	Int:       "Int",
 	Float:     "Float",
-	Char:      "Char",
 	String:    "String",
 	Keyword:   "Keyword",
 	RawString: "RawString",
@@ -108,9 +108,9 @@ func TokenString(tok rune) string {
 	return fmt.Sprintf("%q", string(tok))
 }
 
-// GoWhitespace is the default value for the Scanner's Whitespace field.
-// Its value selects Go's white space characters.
-const GoWhitespace = 1<<'\t' | 1<<'\n' | 1<<'\r' | 1<<' '
+// LispWhitespace is the default value for the Scanner's Whitespace field.
+// Its value selects Lisp's white space characters.
+const LispWhitespace = 1<<'\t' | 1<<'\n' | 1<<'\r' | 1<<' '
 
 const bufLen = 1024 // at least utf8.UTFMax
 
@@ -178,8 +178,8 @@ type Scanner struct {
 }
 
 // Init initializes a Scanner with a new source and returns s.
-// Error is set to nil, ErrorCount is set to 0, Mode is set to GoTokens,
-// and Whitespace is set to GoWhitespace.
+// Error is set to nil, ErrorCount is set to 0, Mode is set to LispTokens,
+// and Whitespace is set to LispWhitespace.
 func (s *Scanner) Init(src io.Reader) *Scanner {
 	s.src = src
 
@@ -206,8 +206,8 @@ func (s *Scanner) Init(src io.Reader) *Scanner {
 	// initialize public fields
 	s.Error = nil
 	s.ErrorCount = 0
-	s.Mode = GoTokens
-	s.Whitespace = GoWhitespace
+	s.Mode = LispTokens
+	s.Whitespace = LispWhitespace
 	s.Line = 0 // invalidate token position
 
 	return s
@@ -633,7 +633,7 @@ func (s *Scanner) scanRawString() rune {
 func (s *Scanner) scanComment(ch rune) rune {
 	if ch != '\n' {
 		// line comment
-		ch = s.next() // read character after ";;"
+		ch = s.next() // read character after ";"
 		for ch != '\n' && ch >= 0 {
 			ch = s.next()
 		}

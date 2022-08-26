@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
+// Copyright 2022 Jordi Íñigo Griera. All rights reserved.
+
 package scanner
 
 import (
@@ -232,7 +234,7 @@ var tokenList = []token{
 	{'~', "~"},
 	{'@', "@"},
 
-	{Comment, ";; minus symbol cases"},
+	{Comment, ";; hyphen symbol cases"},
 	{Ident, "-"},           // special case
 	{Ident, "-minus"},      // special case
 	{Ident, "hello-world"}, // special case
@@ -303,8 +305,8 @@ func testScan(t *testing.T, mode uint) {
 }
 
 func TestScan(t *testing.T) {
-	testScan(t, GoTokens)
-	testScan(t, GoTokens&^SkipComments)
+	testScan(t, LispTokens)
+	testScan(t, LispTokens&^SkipComments)
 }
 
 func TestInvalidExponent(t *testing.T) {
@@ -331,7 +333,7 @@ func TestInvalidExponent(t *testing.T) {
 func TestPosition(t *testing.T) {
 	src := makeSource("\t\t\t\t%s\n")
 	s := new(Scanner).Init(src)
-	s.Mode = GoTokens &^ SkipComments
+	s.Mode = LispTokens &^ SkipComments
 	s.Scan()
 	pos := Position{"", 4, 1, 5}
 	for _, k := range tokenList {
@@ -598,19 +600,6 @@ func TestNegativeDecimal(t *testing.T) {
 		t.Errorf("%d errors", s.ErrorCount)
 	}
 }
-
-// (read-string "\"\n\"")
-
-// func TestEscapeCR(t *testing.T) {
-// 	s := new(Scanner).Init(strings.NewReader(`(read-string "\"\n\"")`))
-// 	checkTok(t, s, 1, s.Scan(), '(', "(")
-// 	checkTok(t, s, 1, s.Scan(), Ident, "read-string")
-// 	checkTok(t, s, 1, s.Scan(), String, `\"\n\"`)
-// 	checkTok(t, s, 1, s.Scan(), ')', ")")
-// 	if s.ErrorCount != 0 {
-// 		t.Errorf("%d errors", s.ErrorCount)
-// 	}
-// }
 
 func TestScanSingleSemiColon(t *testing.T) {
 	s := new(Scanner).Init(strings.NewReader(";"))
