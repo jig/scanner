@@ -9,10 +9,10 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/setup-go@v5
+    - uses: actions/setup-go@v6
       with:
         go-version: ${{ matrix.go-version }}
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - run: go vet ./...
     - uses: dominikh/staticcheck-action@v1
       with:
