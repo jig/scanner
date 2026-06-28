@@ -60,7 +60,7 @@ func (pos Position) String() string {
 // For instance, if the mode is ScanIdents (not ScanStrings), the string
 // "foo" is scanned as the token sequence '"' Ident '"'.
 //
-// Use LispTokens to configure the Scanner such that it accepts all Go
+// Use LispTokens to configure the Scanner such that it accepts all Lisp
 // literal tokens including Go identifiers. Comments will be skipped.
 const (
 	ScanIdents     = 1 << -Ident
@@ -334,10 +334,6 @@ func (s *Scanner) error(msg string) {
 		s.Error(s, msg)
 		return
 	}
-	pos := s.Position
-	if !pos.IsValid() {
-		pos = s.Pos()
-	}
 }
 
 func (s *Scanner) errorf(format string, args ...any) {
@@ -577,7 +573,7 @@ func (s *Scanner) scanDigits(ch rune, base, n int) rune {
 }
 
 func (s *Scanner) scanEscape(quote rune) rune {
-	ch := s.next() // read character after '/'
+	ch := s.next() // read character after \
 	switch ch {
 	case 'a', 'b', 'f', 'n', 'r', 't', 'v', '\\', quote:
 		// nothing to do
