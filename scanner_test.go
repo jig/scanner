@@ -1081,23 +1081,23 @@ func TestNumbers(t *testing.T) {
 // 		}
 // 	}
 // }
-
-func extractInts(t string, mode uint) (res string) {
-	var s Scanner
-	s.Init(strings.NewReader(t))
-	s.Mode = mode
-	for {
-		switch tok := s.Scan(); tok {
-		case Int, Float:
-			if len(res) > 0 {
-				res += " "
-			}
-			res += s.TokenText()
-		case EOF:
-			return
-		}
-	}
-}
+//
+// func extractInts(t string, mode uint) (res string) {
+// 	var s Scanner
+// 	s.Init(strings.NewReader(t))
+// 	s.Mode = mode
+// 	for {
+// 		switch tok := s.Scan(); tok {
+// 		case Int, Float:
+// 			if len(res) > 0 {
+// 				res += " "
+// 			}
+// 			res += s.TokenText()
+// 		case EOF:
+// 			return
+// 		}
+// 	}
+// }
 
 func TestIssue50909(t *testing.T) {
 	var s Scanner
