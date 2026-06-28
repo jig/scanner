@@ -61,7 +61,7 @@ func (pos Position) String() string {
 // "foo" is scanned as the token sequence '"' Ident '"'.
 //
 // Use LispTokens to configure the Scanner such that it accepts all Lisp
-// literal tokens including Go identifiers. Comments will be skipped.
+// literal tokens including Lisp identifiers. Comments will be skipped.
 const (
 	ScanIdents     = 1 << -Ident
 	ScanInts       = 1 << -Int
@@ -299,8 +299,7 @@ func (s *Scanner) next() rune {
 
 // Next reads and returns the next Unicode character.
 // It returns EOF at the end of the source. It reports
-// a read error by calling s.Error, if not nil; otherwise
-// it prints an error message to os.Stderr. Next does not
+// a read error by calling s.Error, if not nil. Next does not
 // update the Scanner's Position field; use Pos() to
 // get the current position.
 func (s *Scanner) Next() rune {
@@ -641,8 +640,7 @@ func (s *Scanner) scanComment(ch rune) rune {
 // Scan reads the next token or Unicode character from source and returns it.
 // It only recognizes tokens t for which the respective Mode bit (1<<-t) is set.
 // It returns EOF at the end of the source. It reports scanner errors (read and
-// token errors) by calling s.Error, if not nil; otherwise it prints an error
-// message to os.Stderr.
+// token errors) by calling s.Error, if not nil
 func (s *Scanner) Scan() rune {
 	ch := s.Peek()
 
