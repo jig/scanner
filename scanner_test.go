@@ -201,6 +201,7 @@ var tokenList = []token{
 	{String, `"\U00000000"`},
 	{String, `"\U0000ffAB"`},
 	{String, `"` + f100 + `"`},
+	{String, "\"line1\nline2\""}, // literal newline: multi-line string
 
 	{Comment, ";; raw strings"},
 	{RawString, "¬¬"},
@@ -683,7 +684,9 @@ func TestError(t *testing.T) {
 	testError(t, `1.5e-`, "<input>:1:6", "exponent has no digits", Float)
 
 	testError(t, `"abc`, "<input>:1:5", "literal not terminated", String)
-	testError(t, `"abc`+"\n", "<input>:1:5", "literal not terminated", String)
+	// A newline no longer terminates a "…" string, so an unterminated one is
+	// only reported at EOF (here, the start of line 2).
+	testError(t, `"abc`+"\n", "<input>:2:1", "literal not terminated", String)
 	testError(t, "¬abc\n", "<input>:2:1", "literal not terminated", RawString)
 	testError(t, "¬abc\n", "<input>:2:1", "literal not terminated", RawString)
 	testError(t, "¬abc¬¬\n", "<input>:2:1", "literal not terminated", RawString)

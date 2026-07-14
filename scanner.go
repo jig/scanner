@@ -594,7 +594,10 @@ func (s *Scanner) scanEscape(quote rune) rune {
 func (s *Scanner) scanString(quote rune) (n int) {
 	ch := s.next() // read character after quote
 	for ch != quote {
-		if ch == '\n' || ch < 0 {
+		// A literal newline is allowed: like Clojure (and unlike Go's
+		// text/scanner), "…" strings may span several lines. Only real EOF
+		// leaves the literal unterminated.
+		if ch < 0 {
 			s.error("literal not terminated")
 			return
 		}
