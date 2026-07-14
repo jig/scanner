@@ -1022,6 +1022,11 @@ func TestNumbers(t *testing.T) {
 		{Float, "1_000.000_1", "1_000.000_1", ""},
 		{Int, "0x_f00d", "0x_f00d", ""},
 		{Float, "0x_f00d.0p1_2", "0x_f00d.0p1_2", ""},
+		// negative numbers are single tokens: the sign must not hide the
+		// radix prefix from the separator check
+		{Int, "-0xCAFE_CAFE", "-0xCAFE_CAFE", ""},
+		{Int, "-0b_1000_0001", "-0b_1000_0001", ""},
+		{Int, "-1_000", "-1_000", ""},
 
 		{Int, "0b__1000", "0b__1000", "'_' must separate successive digits"},
 		{Int, "0o60___0", "0o60___0", "'_' must separate successive digits"},

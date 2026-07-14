@@ -516,6 +516,14 @@ func invalidSep(x string) int {
 	d := '.'  // digit, one of '_', '0' (a digit), or '.' (anything else)
 	i := 0
 
+	// Unlike Go's text/scanner, negative numbers are single tokens here:
+	// skip the sign so a radix prefix right after it is still recognised
+	// (otherwise the hex digits of e.g. -0xCAFE_CAFE read as non-digits
+	// and the separator check fails).
+	if len(x) > 0 && x[0] == '-' {
+		x = x[1:]
+	}
+
 	// a prefix counts as a digit
 	if len(x) >= 2 && x[0] == '0' {
 		x1 = lower(rune(x[1]))
